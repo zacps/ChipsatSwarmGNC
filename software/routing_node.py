@@ -33,6 +33,9 @@ class RoutingNode:
 
         self.last_sent_time = 0.0
 
+        self.last_on_poll = time.monotonic()
+        self.poll_interval = 8.4
+
     def on_received_data(self, data):
         self.process_message(data)
 
@@ -78,7 +81,10 @@ class RoutingNode:
                 data = self.recv(timeout=0.1)
                 if data[0]:
                     self.on_received_data(data)
-                self.on_poll()
+
+                if time.monotonic() - self.last_on_poll > self.poll_interval:
+                    self.on_poll()
+                    self.last_on_poll = time.monotonic()
 
                 if time.monotonic() - self.last_sent_time >= 3 and len(self.message) > 0:
                     # Resend after a second if we haven't got an ACK
