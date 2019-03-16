@@ -4,7 +4,7 @@ from digitalio import DigitalInOut, Direction
 import time
 
 class RoutingNode:
-    SYNC_WORD      = "DAB5"
+    SYNC_WORD      = "666A"
     HEADER_SYNC    = 0x80
     HEADER_MESSAGE = 0x81
     PACKET_SIZE    = 8
@@ -16,7 +16,7 @@ class RoutingNode:
         gdo0 = DigitalInOut(board.WAKE)
         # Create an instance to send and receive.
         # SPI object, Chip Select Pin, baudrate, frequency in Hz, Syncword
-        self.tx = CC1101(spi, cs, gdo0, 50000, 434400000, self.SYNC_WORD)
+        self.tx = CC1101(spi, cs, gdo0, 50000, 433920000, self.SYNC_WORD)
 
         self.rank = 255
         self.last_seen_id = 255
@@ -26,6 +26,12 @@ class RoutingNode:
 
         self.led = DigitalInOut(board.LED)
         self.led.direction = Direction.OUTPUT
+
+        # self.message is non-empty iff this chipsat has sent a message but hasn't
+        # received a response yet
+        self.message = bytearray([])
+
+        self.last_sent_time = 0.0
 
     def on_received_data(self, data):
         self.process_message(data)
@@ -62,21 +68,34 @@ class RoutingNode:
             self.receiving = True
 
         data = self.tx.receiveRawData(self.PACKET_SIZE, timeout=timeout)
-        print("RX", ':'.join('{:>08b}'.format(i) for i in data))
+        if data != bytearray([0] * self.PACKET_SIZE):
+            print("RX", ':'.join('{:>08b}'.format(i) for i in data))
         return data
 
     def poll(self):
-        while True:
-            data = self.recv(timeout=0.1)
-            if data[0]:
-                self.on_received_data(data)
-            self.on_poll()
+        try:
+            while True:
+                data = self.recv(timeout=0.1)
+                if data[0]:
+                    self.on_received_data(data)
+                self.on_poll()
 
-    def send_message(self, message):
-        data = bytearray(len(message) + 2)
+                if time.monotonic() - self.last_sent_time >= 3 and len(self.message) > 0:
+                    # Resend after a second if we haven't got an ACK
+                    self.send_message()
+                    self.last_sent_time = time.monotonic()
+        except KeyboardInterrupt:
+            self.message = bytearray(input('> ').encode('utf-8'))
+            self.send_message()
+            self.last_sent_time = time.monotonic()
+            self.poll()
+
+    def send_message(self):
+        """Send a message back to master.  The message should be contained in self.message."""
+        data = bytearray(len(self.message) + 2)
         data[0] = self.HEADER_MESSAGE
         data[1] = self.rank - 1
-        data[2:] = message
+        data[2:] = self.message
         self.blink(2)
         self.send(data)
 
@@ -84,24 +103,29 @@ class RoutingNode:
         if data[0] == self.HEADER_SYNC:
             self.process_sync_message(data)
         elif data[0] == self.HEADER_MESSAGE:
-            self.forward_message(data)
+            recv_rank = data[1]
+            if recv_rank == self.rank:
+                # This message is for us!
+                self.message += data[2:]
+                self.forward_message()
+            elif recv_rank == (self.rank - 2) % 256:
+                # Basically an ACK
+                self.message = bytearray([])
 
-    def forward_message(self, data):
+    def forward_message(self):
         # message format is <header:8><recv_rank:8><data:*>
-        assert data[0] == self.HEADER_MESSAGE
+        data = bytearray(len(self.message) + 2)
+        data[0] = self.HEADER_MESSAGE
+        data[1] = (self.rank - 1) % 256
+        data[2:] = self.message
 
-        recv_rank = data[1]
-        if recv_rank != self.rank:
-            return
-
-        if recv_rank == 0:
+        if self.rank == 0:
             self.blink(4)
-            print('Master received', data[2:])
-            return
+            print('Master received', bytes(self.message))
+            self.message = bytearray([])
 
         print("Forwarding message", data[2:])
 
-        data[1] -= 1
         self.blink(1)
         self.send(data)
 

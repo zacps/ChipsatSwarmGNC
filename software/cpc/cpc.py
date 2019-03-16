@@ -293,7 +293,7 @@ class CC1101:
     def receiveRawData(self, length, timeout=999999):
         self.writeSingleByte(PKTLEN, length)
         self.strobe(SRX)
-        print("waiting for data")
+        #print("waiting for data")
 
         init = time.monotonic()
 
@@ -310,7 +310,7 @@ class CC1101:
         data_len = length#+2 # add 2 status bytes
         data = self.readBurst(RXFIFO, data_len)[1:]
 
-        print("Data: ", data)
+        #print("Data: ", data)
         self.strobe(SIDLE)
         while (self.readSingleByte(MARCSTATE) != 0x01):
             pass
