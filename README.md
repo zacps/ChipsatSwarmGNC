@@ -1,5 +1,7 @@
 # Chipsat Swarm GNC Project
 
+Approach and description at https://docs.google.com/document/d/1hzKnmu8YG_KFgRJf368QwCqYyr6BJ2YGy78ygURtYAs/edit.
+
 Forked from https://github.com/roboticexplorationlab/sprite.
 
 ## Accessing the Serial Console
