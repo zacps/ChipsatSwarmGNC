@@ -272,7 +272,7 @@ class CC1101:
         print("waiting for data")
 
         while self.gdo0.value == False:
-            pass 
+            pass
         #detected rising edge
 
         while self.gdo0.value == True:
@@ -290,17 +290,21 @@ class CC1101:
         self.strobe(SFRX)
         return newStr
 
-    def receiveRawData(self, length):
+    def receiveRawData(self, length, timeout=999999):
         self.writeSingleByte(PKTLEN, length)
         self.strobe(SRX)
         print("waiting for data")
 
+        init = time.time()
+
         while self.gdo0.value == False:
-            pass
+            if time.time() - init > timeout:
+                return bytearray([0] * 16)
         #detected rising edge
 
         while self.gdo0.value == True:
-            pass
+            if time.time() - init > timeout:
+                return bytearray([0] * 16)
         #detected falling edge
 
         data_len = length#+2 # add 2 status bytes

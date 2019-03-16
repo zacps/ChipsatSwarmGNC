@@ -48,16 +48,24 @@ class RoutingNode:
         print("TX", data)
         self.tx.sendRawData(data, self.SYNC_WORD)
 
-    def recv(self):
+    def recv(self, timeout=999999):
         if not self.receiving:
             self.tx.setupRX()
             self.tx.setupCheck()
             self.sending = False
             self.receiving = True
 
-        data = self.tx.receiveRawData(self.PACKET_SIZE)
+        data = self.tx.receiveRawData(self.PACKET_SIZE, timeout=timeout)
         print("RX", data)
         return data
+
+    def poll(self, callback, timed_callback=None):
+        while True:
+            data = self.recv(timeout=1)
+            if data[0]:
+                callback(data)
+            if timed_callback:
+                timed_callback()
 
     def send_message(self, message):
         data = bytearray(len(message) + 2)
