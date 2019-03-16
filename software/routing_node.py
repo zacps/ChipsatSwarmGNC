@@ -1,4 +1,6 @@
 from cpc.cpc import *
+import board
+from digitalio import DigitalInOut, Direction
 import time
 
 class RoutingNode:
@@ -21,6 +23,16 @@ class RoutingNode:
 
         self.sending = False
         self.receiving = False
+
+        self.led = DigitalInOut(board.LED)
+        self.led.direction = Direction.OUTPUT
+
+    def blink(self):
+        for _ in range(2):
+            self.led.value = 1
+            time.sleep(0.3)
+            self.led.value = 0
+            time.sleep(0.3)
 
     def send(self, data):
         if not self.sending:
@@ -52,6 +64,7 @@ class RoutingNode:
         data[0] = self.HEADER_MESSAGE
         data[1] = self.rank - 1
         data[2:] = message
+        self.blink()
         self.send(data)
 
     def process_message(self, data):
@@ -69,12 +82,15 @@ class RoutingNode:
             return
 
         if recv_rank == 0:
+            self.blink()
+            self.blink()
             print('Master received', data[2:])
             return
 
         print("Forwarding message", data[2:])
 
         data[1] -= 1
+        self.blink()
         self.send(data)
 
     def broadcast_sync(self, message_id):
