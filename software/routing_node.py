@@ -43,7 +43,9 @@ class RoutingNode:
             self.sending = False
             self.receiving = True
 
-        return self.tx.receiveRawData(self.PACKET_SIZE)
+        data = self.tx.receiveRawData(self.PACKET_SIZE)
+        print("RX", data)
+        return data
 
     def send_message(self, message):
         data = bytearray(len(message) + 2)
