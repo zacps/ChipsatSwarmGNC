@@ -295,15 +295,15 @@ class CC1101:
         self.strobe(SRX)
         print("waiting for data")
 
-        init = time.time()
+        init = time.monotonic()
 
         while self.gdo0.value == False:
-            if time.time() - init > timeout:
+            if time.monotonic() - init > timeout:
                 return bytearray([0] * length)
         #detected rising edge
 
         while self.gdo0.value == True:
-            if time.time() - init > timeout:
+            if time.monotonic() - init > timeout:
                 return bytearray([0] * length)
         #detected falling edge
 

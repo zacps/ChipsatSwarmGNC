@@ -33,12 +33,12 @@ class RoutingNode:
     def on_poll(self):
         pass
 
-    def blink(self):
-        for _ in range(2):
+    def blink(self, n):
+        for _ in range(n):
             self.led.value = 1
-            time.sleep(0.3)
+            time.sleep(0.3/n)
             self.led.value = 0
-            time.sleep(0.3)
+            time.sleep(0.3/n)
 
     def send(self, data):
         if not self.sending:
@@ -67,7 +67,7 @@ class RoutingNode:
 
     def poll(self):
         while True:
-            data = self.recv(timeout=1)
+            data = self.recv(timeout=0.1)
             if data[0]:
                 self.on_received_data(data)
             self.on_poll()
@@ -77,7 +77,7 @@ class RoutingNode:
         data[0] = self.HEADER_MESSAGE
         data[1] = self.rank - 1
         data[2:] = message
-        self.blink()
+        self.blink(2)
         self.send(data)
 
     def process_message(self, data):
@@ -95,15 +95,14 @@ class RoutingNode:
             return
 
         if recv_rank == 0:
-            self.blink()
-            self.blink()
+            self.blink(4)
             print('Master received', data[2:])
             return
 
         print("Forwarding message", data[2:])
 
         data[1] -= 1
-        self.blink()
+        self.blink(1)
         self.send(data)
 
     def broadcast_sync(self, message_id):
@@ -115,6 +114,8 @@ class RoutingNode:
         data.append(self.HEADER_SYNC)
         data.append(message_id)
         data.append(self.rank)
+
+        self.blink(3)
 
         self.send(data)
 
