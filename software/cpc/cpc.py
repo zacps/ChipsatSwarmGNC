@@ -299,12 +299,12 @@ class CC1101:
 
         while self.gdo0.value == False:
             if time.time() - init > timeout:
-                return bytearray([0] * 16)
+                return bytearray([0] * length)
         #detected rising edge
 
         while self.gdo0.value == True:
             if time.time() - init > timeout:
-                return bytearray([0] * 16)
+                return bytearray([0] * length)
         #detected falling edge
 
         data_len = length#+2 # add 2 status bytes

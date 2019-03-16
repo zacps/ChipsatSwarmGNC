@@ -7,7 +7,7 @@ class RoutingNode:
     SYNC_WORD      = "BEEF"
     HEADER_SYNC    = 0x80
     HEADER_MESSAGE = 0x81
-    PACKET_SIZE    = 16
+    PACKET_SIZE    = 8
 
     def __init__(self):
         # Initialization.
@@ -26,6 +26,12 @@ class RoutingNode:
 
         self.led = DigitalInOut(board.LED)
         self.led.direction = Direction.OUTPUT
+
+    def on_received_data(self, data):
+        self.process_message(data)
+
+    def on_poll(self):
+        pass
 
     def blink(self):
         for _ in range(2):
@@ -56,16 +62,15 @@ class RoutingNode:
             self.receiving = True
 
         data = self.tx.receiveRawData(self.PACKET_SIZE, timeout=timeout)
-        print("RX", data)
+        print("RX", ':'.join('{:>08b}'.format(i) for i in data))
         return data
 
-    def poll(self, callback, timed_callback=None):
+    def poll(self):
         while True:
             data = self.recv(timeout=1)
             if data[0]:
-                callback(data)
-            if timed_callback:
-                timed_callback()
+                self.on_received_data(data)
+            self.on_poll()
 
     def send_message(self, message):
         data = bytearray(len(message) + 2)
