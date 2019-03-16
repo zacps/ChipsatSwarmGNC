@@ -290,6 +290,69 @@ class CC1101:
         self.strobe(SFRX)
         return newStr
 
+    def receiveRawData(self, length):
+        self.writeSingleByte(PKTLEN, length)
+        self.strobe(SRX)
+        print("waiting for data")
+
+        while self.gdo0.value == False:
+            pass
+        #detected rising edge
+
+        while self.gdo0.value == True:
+            pass
+        #detected falling edge
+
+        data_len = length#+2 # add 2 status bytes
+        data = self.readBurst(RXFIFO, data_len)[1:]
+
+        print("Data: ", data)
+        self.strobe(SIDLE)
+        while (self.readSingleByte(MARCSTATE) != 0x01):
+            pass
+        self.strobe(SFRX)
+        return data
+
+    def sendRawData(self, data, syncword):
+        print("TXBYTES before sendData:", self.readSingleByte(TXBYTES))
+        paddingLen = math.floor(64-2-len(data)) # 2 byte sync word
+
+        syncword = int(syncword, 16)
+
+        syncword_hi = syncword // 256
+        syncword_lo = syncword % 256
+
+        data = bytearray([170])*paddingLen + bytearray([syncword_hi, syncword_lo]) + data
+
+        self.writeSingleByte(PKTLEN, len(data))
+
+        self.strobe(SIDLE)
+        while (self.readSingleByte(MARCSTATE) & 0x1F != 0x01): # wait for CC to enter idle state
+            pass
+        self.strobe(SFTX) # flush TX FIFO
+        time.sleep(0.05)
+
+        self.writeBurst(TXFIFO, data)
+        self.strobe(STX)
+
+        remaining_bytes = self.readSingleByte(TXBYTES) & 0x7F
+        while remaining_bytes != 0:
+            time.sleep(0.1)
+            print("Waiting until all bytes are transmited, remaining bytes: %d" % remaining_bytes)
+            remaining_bytes = self.readSingleByte(TXBYTES) & 0x7F
+
+        self.strobe(SFTX)
+        self.strobe(SFRX)
+        time.sleep(0.05)
+
+        if (self.readSingleByte(TXBYTES) & 0x7F) == 0:
+            print("Packet sent!\n\n")
+            return True
+
+        else:
+            print(self.readSingleByte(TXBYTES) & 0x7F)
+            return False
+
     def sendData(self, bitstring, syncword):
         print("TXBYTES before sendData:", self.readSingleByte(TXBYTES))
         paddingLen = math.floor((512-16-len(bitstring))/8) # 16 Bits sync word
