@@ -4,7 +4,7 @@ from digitalio import DigitalInOut, Direction
 import time
 
 class RoutingNode:
-    SYNC_WORD      = "BEEF"
+    SYNC_WORD      = "DAB5"
     HEADER_SYNC    = 0x80
     HEADER_MESSAGE = 0x81
     PACKET_SIZE    = 8
