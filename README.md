@@ -1,24 +1,6 @@
-[hardware](https://github.com/maholli/sprite/tree/master/hardware): KiCad PCB files and bill of materials. Assembling a sprite? Check out [https://roboticexplorationlab.github.io/sprite/](https://roboticexplorationlab.github.io/sprite/) for an interactive BOM!
+# Chipsat Swarm GNC Project
 
-[firmware](https://github.com/maholli/sprite/tree/master/firmware): pre-built circuitpython bootloader.bin and firmware.uf2 (and the files to build it yourself)
-
-[software](https://github.com/maholli/sprite/tree/master/software): circuitpython scripts and libraries working on the sprite
-
-<br>
-<br>
-<br>
-
-----
-
-<p align="middle">
-  <img width="800" src="https://github.com/RoboticExplorationLab/sprite/blob/master/hardware/board.PNG">
-</p>
-## Useful Resources
-
-* [circuitpython libraries](https://github.com/maholli/SAM32/tree/master/firmware/useful_libraries)
-* the [adafruit circuitpython playground page](https://learn.adafruit.com/adafruit-circuit-playground-express/circuitpython-playground) has a lot of good tutorials for doing basic microcontroller things in CP
-* [built-in "python" modules](https://circuitpython.readthedocs.io/en/latest/shared-bindings/index.html#modules) available in circuitpython
-* [helpful interactive BOM](https://maholli.github.io/sprite/) for ease of assembly
+Forked from https://github.com/roboticexplorationlab/sprite.
 
 ## Accessing the Serial Console
 nearly any terminal program can communicate with the sprite (baud=112500, data=8 bit, parity=None, flow control=XON/XOFF). For example...
@@ -38,7 +20,7 @@ nearly any terminal program can communicate with the sprite (baud=112500, data=8
 5. Plug in, then unplug the sprite and notice the impacted "COM" port.
 6. Return to PuTTY and enter "COM___" in the "Serial Line" field, and then click "Open"
 
-## Demos
+## Running
 
 Put all the files located in [/software/](/software/) on to the sprite and start the serial console (as described above). After pressing <kbd>Ctrl</kbd>+<kbd>C</kbd> to halt the sprite, press any key to enter the REPL, then type
 
@@ -56,5 +38,3 @@ import blink
 2. i2c_IMU.py - samples all available sensors on the IMU and prints the results
 3. cursor.py - uses the X,Y data from the IMU accelerometer and moves the computer cursor accordingly
 4. cpc_test.py - example transmit message for the CC1101 radio
-
-### see https://github.com/maholli/SAM32 for more help getting started with circuitpython
