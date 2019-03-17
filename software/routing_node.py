@@ -2,6 +2,7 @@ from cpc.cpc import *
 import board
 from digitalio import DigitalInOut, Direction
 import time
+import struct
 
 class RoutingNode:
     SYNC_WORD      = "666A"
@@ -72,7 +73,8 @@ class RoutingNode:
 
         data = self.tx.receiveRawData(self.PACKET_SIZE, timeout=timeout)
         if data != bytearray([0] * self.PACKET_SIZE):
-            print("RX", ':'.join('{:>08b}'.format(i) for i in data))
+            #print("RX", ':'.join('{:>08b}'.format(i) for i in data))
+            pass
         return data
 
     def poll(self):
@@ -116,6 +118,7 @@ class RoutingNode:
                 self.forward_message()
             elif recv_rank == (self.rank - 2) % 256:
                 # Basically an ACK
+                print('Received ACK')
                 self.message = bytearray([])
 
     def forward_message(self):
@@ -128,6 +131,7 @@ class RoutingNode:
         if self.rank == 0:
             self.blink(4)
             print('Master received', bytes(self.message))
+            print('*** Lux:', struct.unpack('f', self.message[:4]))
             self.message = bytearray([])
 
         print("Forwarding message", data[2:])

@@ -342,7 +342,7 @@ class CC1101:
         remaining_bytes = self.readSingleByte(TXBYTES) & 0x7F
         while remaining_bytes != 0:
             time.sleep(0.1)
-            print("Waiting until all bytes are transmited, remaining bytes: %d" % remaining_bytes)
+            #print("Waiting until all bytes are transmited, remaining bytes: %d" % remaining_bytes)
             remaining_bytes = self.readSingleByte(TXBYTES) & 0x7F
 
         self.strobe(SFTX)
@@ -350,11 +350,10 @@ class CC1101:
         time.sleep(0.05)
 
         if (self.readSingleByte(TXBYTES) & 0x7F) == 0:
-            print("Packet sent!\n\n")
+            #print("Packet sent!\n\n")
             return True
-
         else:
-            print(self.readSingleByte(TXBYTES) & 0x7F)
+            #print(self.readSingleByte(TXBYTES) & 0x7F)
             return False
 
     def sendData(self, bitstring, syncword):
