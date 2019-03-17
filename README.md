@@ -11,6 +11,7 @@ This project tackles the problem of consolidating data from a large swarm of chi
 *  Full writeup: https://docs.google.com/document/d/1hzKnmu8YG_KFgRJf368QwCqYyr6BJ2YGy78ygURtYAs/edit
 *  Presentation: https://docs.google.com/presentation/d/1eVsdA_jHy1klxJGCvtmRGSL1OXVipmdyBoozKms7gx4/edit
 *  Hackathon details, objectives: https://chipsat-aukland.devpost.com/
+*  Our submission: https://devpost.com/software/chipsat-mesh-networking
 
 Forked from: https://github.com/roboticexplorationlab/sprite.
 
