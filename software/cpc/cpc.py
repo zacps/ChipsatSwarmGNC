@@ -110,6 +110,10 @@ RCCTRL0_STATUS = 0xFD  # Last RC Oscillator Calibration Result
 
 PA_TABLE = [0x00, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
 
+
+def usDelay(self, useconds):
+    time.sleep(useconds / 1000000.0)
+
 class CC1101:
     def __init__(self, spi, cs, gdo0, baudrate, frequency, syncword, offset=0): #optional frequency offset in Hz
         self.gdo0 = gdo0
@@ -222,6 +226,15 @@ class CC1101:
         self.writeSingleByte(TEST2, 0x81)     
         self.writeSingleByte(TEST1, 0x35)     
         self.writeSingleByte(TEST0, 0x0B)
+
+    def switchToTX(self):
+        #self._strobe(self.STX)
+        self.device.write(bytearray([STX, 0x00]), end=1)
+        #self.usDelay(2)
+
+    def switchToRX(self):
+        self.device.write(bytearray([SRX, 0x00]), end=1)
+        #self.usDelay(2)
 
     def writeSingleByte(self, address, byte_data):
         databuffer = bytearray([WRITE_SINGLE_BYTE | address, byte_data])
