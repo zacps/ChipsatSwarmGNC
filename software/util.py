@@ -14,7 +14,7 @@ def to_bits(s):
 
 # Converts a bitstring to a human-readable string.
 def from_bits(bits):
-	bits = list(map(bits, int))
+	bits = list(map(int, bits))
 	chars = []
 	for b in range(len(bits) / 8):
 		byte = bits[b*8:(b+1)*8]
